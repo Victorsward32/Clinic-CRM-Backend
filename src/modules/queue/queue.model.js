@@ -3,17 +3,17 @@ import mongoose from "mongoose";
 const queueSchema = new mongoose.Schema({
     tokenNumber:{
         type:Number,
-        require:true,
+        required:true,
     },
     patient:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"patient",
-        require:true
+        required:true
     },
     doctor:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
-        require:true
+        required:true
     },
     status:{
         type:String,
