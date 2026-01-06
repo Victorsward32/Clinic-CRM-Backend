@@ -7,10 +7,16 @@ export const createVisit = async (data,doctorId) =>{
     })
 }
 
-export const getPatientVisits = async (patientId) =>{
-    return await visit.find({
-        patient:patientId
-    }).sort({createdAt:-1});
-    
-}
+export const getPatientVisits = async (patientId) => {
+  console.log("Patient ID:", patientId);
+
+  const visits = await visit
+    .find({ patient: patientId })
+    .sort({ createdAt: -1 });
+
+  console.log("Visits:", visits);
+
+  return visits;
+};
+
 

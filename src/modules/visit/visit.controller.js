@@ -16,13 +16,14 @@ export const addVisit= async (req,res,next)=>{
 
 export const listVisit = async (req,res,next) =>{
     try {
-       const visits = getPatientVisits(req.params.patientId); 
-       res.status(201).json({
-        success:true,
-        data:visits
-       })
-    } catch (error) {
-        console.log(error,"")
-        next(error);
-    }
+    const patientId = req.params.id;
+    const visits = await getPatientVisits(patientId);
+
+    res.status(200).json({
+      success: true,
+      data: visits,
+    });
+  } catch (error) {
+    next(error);
+  }
 }

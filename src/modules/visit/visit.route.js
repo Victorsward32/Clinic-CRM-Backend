@@ -4,7 +4,7 @@ import { addVisit, listVisit } from "./visit.controller.js";
 
 const visitRoutes = express.Router();
 visitRoutes.post('/',authMiddleware,addVisit);
-visitRoutes.get('/:patientId',authMiddleware,listVisit);
+visitRoutes.get('/:id',authMiddleware,listVisit);
 
 
 export default visitRoutes

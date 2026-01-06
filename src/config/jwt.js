@@ -12,11 +12,12 @@ export const generateToken = (payload)=>{
   
 }
 
-export const verifyToken = async (token)=>{
+export const verifyToken = (token)=>{
     try {
         const result=jwt.verify(token,SECRET_KEY)
         return result
     } catch (error) {
           console.log(`JWT Verification Error::${error.message}`)
+          return null
     }
 }
