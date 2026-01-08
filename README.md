@@ -1,113 +1,156 @@
-🏥 Clinic CRM Backend – API Documentation
+<h1>🏥 Clinic CRM Backend – API Documentation</h1>
 
-A production-ready backend system for managing patients, queues, appointments, visits, reports, reminders, and user authentication for a small clinic or private practice.
+<p>
+A complete backend system for managing <strong>patients, queue, appointments, visits, reports, reminders</strong>,
+and <strong>user authentication</strong> for a small clinic.
+</p>
 
-This repository focuses on clean modular APIs designed to scale with clinic growth.
+<hr />
 
-🔗 Base URL
+<h2>🔗 Base URL</h2>
+
+<pre>
 http://localhost:3000/clinic-crm-api
+</pre>
 
+<hr />
 
-All routes are prefixed with:
+<h2>🔐 Authentication Flow (ENTRY POINT)</h2>
 
-app.use("/clinic-crm-api", router);
+<h3>1️⃣ Register</h3>
 
-🔐 Authentication Flow (ENTRY POINT)
-
-Authentication is JWT-based.
-All protected routes require a valid token.
-
-1️⃣ Register
+<pre>
 POST /auth/register
+</pre>
 
+<p>Creates a new doctor/staff account.</p>
 
-Creates a new doctor / clinic staff account.
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "name": "Dr John",
   "email": "doctor@test.com",
   "password": "123456"
 }
+</pre>
 
-2️⃣ Login
+<hr />
+
+<h3>2️⃣ Login</h3>
+
+<pre>
 POST /auth/login
+</pre>
 
-
-Response
-
+<strong>Response</strong>
+<pre>
 {
   "token": "JWT_TOKEN"
 }
+</pre>
 
+<p>
+<strong>Note:</strong> This token is required for all protected APIs.
+</p>
 
-🔐 Use this token for all protected APIs
-
-Header Format
-
+<strong>Authorization Header (for protected routes)</strong>
+<pre>
 Authorization: Bearer JWT_TOKEN
+</pre>
 
-3️⃣ Forgot Password (OTP via Email)
+<hr />
+
+<h3>3️⃣ Forgot Password (OTP via Email)</h3>
+
+<pre>
 POST /auth/forget-password
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "email": "doctor@test.com"
 }
+</pre>
 
+<p>➡ Sends a <strong>6-digit OTP</strong> to the registered email.</p>
 
-📧 Sends a 6-digit OTP to the registered email.
+<hr />
 
-4️⃣ Reset Password
+<h3>4️⃣ Reset Password</h3>
+
+<pre>
 POST /auth/reset-password
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "email": "doctor@test.com",
   "otp": "123456",
   "newPassword": "newPass123"
 }
+</pre>
 
-👤 USER MODULE
-Upload / Update Profile Image
+<hr />
+
+<h2>👤 User Module</h2>
+
+<h3>Upload / Update Profile Image</h3>
+
+<pre>
 POST /user
+</pre>
 
+<strong>Headers</strong>
+<pre>
+Authorization: Bearer TOKEN
+</pre>
 
-Headers
+<strong>Body (form-data)</strong>
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>image</td>
+    <td>File</td>
+    <td>profile.jpg</td>
+  </tr>
+</table>
 
-Authorization: Bearer JWT_TOKEN
+<p>📌 Image is stored in <strong>Cloudinary</strong> and URL is saved in DB.</p>
 
+<hr />
 
-Body (form-data)
+<h3>Change Password (Logged-in User)</h3>
 
-Key	Type	Description
-image	File	Profile image
-
-📌 Image is uploaded to Cloudinary, and the URL is stored in the database.
-
-Change Password (Logged-in User)
+<pre>
 POST /user/change-password
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "oldPassword": "123456",
   "newPassword": "newPass123"
 }
+</pre>
 
-🧍 PATIENT MODULE
-1️⃣ Add Patient
+<hr />
+
+<h2>🧍 Patient Module</h2>
+
+<h3>1️⃣ Add Patient</h3>
+
+<pre>
 POST /patient
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "name": "Rahul Sharma",
   "age": 32,
@@ -115,209 +158,283 @@ Request Body
   "phone": "9876543210",
   "address": "Mumbai"
 }
+</pre>
 
-2️⃣ List All Patients
+<hr />
+
+<h3>2️⃣ List Patients</h3>
+
+<pre>
 GET /patient
+</pre>
 
+<p>➡ Used for dashboard patient listing.</p>
 
-📊 Used for dashboard patient listing.
+<hr />
 
-3️⃣ Get Patient by ID
+<h3>3️⃣ Get Patient by ID</h3>
+
+<pre>
 GET /patient/:id
+</pre>
 
+<p>➡ Used when opening a patient profile.</p>
 
-📁 Used when opening a patient profile.
+<hr />
 
-⏳ QUEUE MODULE (CORE CLINIC FLOW)
+<h2>⏳ Queue Module (Core Clinic Flow)</h2>
 
-Manages the real-time patient waiting system.
+<h3>1️⃣ Add Patient to Queue</h3>
 
-1️⃣ Add Patient to Queue
+<pre>
 POST /queue
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "patientId": "PATIENT_ID"
 }
+</pre>
 
+<p>➡ Patient is assigned a queue number.</p>
 
-➡ Automatically assigns a queue number.
+<hr />
 
-2️⃣ List Current Queue
+<h3>2️⃣ List Queue</h3>
+
+<pre>
 GET /queue
+</pre>
 
+<p>➡ Displays the current waiting list.</p>
 
-➡ Displays the active waiting list.
+<hr />
 
-3️⃣ Update Queue Status
+<h3>3️⃣ Update Queue Status</h3>
+
+<pre>
 PATCH /queue/:id
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "status": "COMPLETED"
 }
+</pre>
 
+<strong>Available Status Values</strong>
+<ul>
+  <li>WAITING</li>
+  <li>IN_PROGRESS</li>
+  <li>COMPLETED</li>
+  <li>CANCELLED</li>
+</ul>
 
-Allowed Status Values
+<hr />
 
-WAITING
+<h2>📅 Appointment Module</h2>
 
-IN_PROGRESS
+<h3>Create Appointment</h3>
 
-COMPLETED
-
-CANCELLED
-
-📅 APPOINTMENT MODULE
-
-Used for future visits and scheduled consultations.
-
-Create Appointment
+<pre>
 POST /appointment
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "patientId": "PATIENT_ID",
   "date": "2026-01-10",
   "time": "11:30 AM"
 }
+</pre>
 
-List Appointments
+<p>➡ Used for scheduling future visits.</p>
+
+<hr />
+
+<h3>List Appointments</h3>
+
+<pre>
 GET /appointment
+</pre>
 
-🩺 VISIT MODULE (MEDICAL RECORDS)
+<hr />
 
-Each doctor consultation creates one visit record.
+<h2>🩺 Visit Module (Medical Records)</h2>
 
-1️⃣ Create Visit
+<h3>1️⃣ Add Visit</h3>
+
+<pre>
 POST /visit
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "patientId": "PATIENT_ID",
   "complaint": "Fever",
   "diagnosis": "Viral",
   "prescription": "Paracetamol"
 }
+</pre>
 
-2️⃣ Get Patient Visit History
+<p>➡ Each consultation is stored as a separate visit.</p>
+
+<hr />
+
+<h3>2️⃣ List Patient Visits</h3>
+
+<pre>
 GET /visit/:id
+</pre>
 
+<p>➡ <code>id</code> represents <strong>patientId</strong>.</p>
+<p>➡ Used to show complete medical history timeline.</p>
 
-📌 id = patientId
+<hr />
 
-➡ Displays complete medical history timeline.
+<h2>📄 Report Module (PDF / Image Uploads)</h2>
 
-📄 REPORT MODULE (PDF / IMAGE UPLOADS)
+<h3>Upload Patient Report</h3>
 
-Supports medical reports, prescriptions, lab results.
-
-Upload Patient Report
+<pre>
 POST /report
+</pre>
 
+<strong>Body (form-data)</strong>
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>file</td>
+    <td>File</td>
+    <td>blood-test.pdf</td>
+  </tr>
+  <tr>
+    <td>patientId</td>
+    <td>Text</td>
+    <td>PATIENT_ID</td>
+  </tr>
+</table>
 
-Body (form-data)
+<p>➡ Files are stored securely in <strong>Cloudinary</strong>.</p>
 
-Key	Type	Description
-file	File	PDF / Image
-patientId	Text	Patient ID
+<hr />
 
-📦 Files are stored securely on Cloudinary.
+<h3>Get Patient Reports</h3>
 
-Get Patient Reports
+<pre>
 GET /report/:patientId
+</pre>
 
+<p>➡ Used in patient profile → reports section.</p>
 
-➡ Used in Patient Profile → Reports Section.
+<hr />
 
-⏰ REMINDER MODULE (PARTIALLY IMPLEMENTED)
-Add Reminder
+<h2>⏰ Reminder Module (Partially Implemented)</h2>
+
+<h3>Add Reminder</h3>
+
+<pre>
 POST /reminders
+</pre>
 
-
-Request Body
-
+<strong>Request Body</strong>
+<pre>
 {
   "patientId": "PATIENT_ID",
   "message": "Follow-up after 7 days",
   "date": "2026-01-15"
 }
+</pre>
 
+<ul>
+  <li>Stored in database only</li>
+  <li>SMS / WhatsApp not enabled (funding limitation)</li>
+</ul>
 
-📌 Currently stored in DB only
-📌 SMS / WhatsApp not enabled due to funding constraints
+<hr />
 
-🔁 COMPLETE APPLICATION FLOW
+<h2>🔁 Complete Application Flow</h2>
+
+<pre>
 Register / Login
-      ↓
+   ↓
 Add Patient
-      ↓
+   ↓
 Add to Queue
-      ↓
+   ↓
 Doctor Consultation
-      ↓
+   ↓
 Create Visit
-      ↓
+   ↓
 Upload Reports
-      ↓
-(Optional) Appointment / Reminder
+   ↓
+Optional Appointment / Reminder
+</pre>
 
-🔐 SECURITY NOTES
+<hr />
 
-JWT-based authentication
+<h2>🔐 Security</h2>
 
-Route protection via middleware
+<ul>
+  <li>JWT-based authentication</li>
+  <li>Protected routes via middleware</li>
+  <li>Password hashing using bcrypt</li>
+  <li>OTP-based password reset</li>
+  <li>Cloudinary for secure file storage</li>
+</ul>
 
-Password hashing using bcrypt
+<hr />
 
-OTP-based password reset flow
+<h2>🧪 Recommended Postman Testing Order</h2>
 
-Cloudinary for secure file storage
+<ol>
+  <li>Auth → Login</li>
+  <li>Patient → Add</li>
+  <li>Queue → Add</li>
+  <li>Visit → Create</li>
+  <li>Report → Upload</li>
+  <li>Queue → Update Status</li>
+</ol>
 
-🧪 POSTMAN TESTING ORDER (IMPORTANT)
+<hr />
 
-Auth → Login
+<h2>🧩 Tech Stack</h2>
 
-Patient → Add
+<ul>
+  <li>Node.js</li>
+  <li>Express.js</li>
+  <li>MongoDB + Mongoose</li>
+  <li>JWT</li>
+  <li>Cloudinary</li>
+  <li>Nodemailer</li>
+  <li>Multer</li>
+</ul>
 
-Queue → Add
+<hr />
 
-Visit → Create
+<h2>🚧 Future Enhancements</h2>
 
-Report → Upload
+<ul>
+  <li>SMS / WhatsApp reminders</li>
+  <li>Role-based access control</li>
+  <li>Analytics dashboard</li>
+  <li>Real-time queue using Socket.IO</li>
+</ul>
 
-Queue → Update Status
+<hr />
 
-🧩 TECH STACK
+<h2>✅ Project Status</h2>
 
-Node.js
-
-Express.js
-
-MongoDB + Mongoose
-
-JWT Authentication
-
-Cloudinary
-
-Nodemailer
-
-Multer
-
-🚧 FUTURE ENHANCEMENTS
-
-SMS / WhatsApp reminders
-
-Role-based access control
-
-Analytics dashboard
-
-Real-time queue using Socket.IO
+<ul>
+  <li>✔ Production-ready backend</li>
+  <li>✔ Modular and scalable architecture</li>
+  <li>✔ Designed for small to medium clinics</li>
+</ul>
