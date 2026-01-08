@@ -1,177 +1,323 @@
-# 🏥 Clinic CRM Backend
+🏥 Clinic CRM Backend – API Documentation
 
-A **scalable, secure backend API** for managing clinic operations such as **authentication, patients, doctors, appointments, queues, and roles**. Built with **Node.js, Express, MongoDB**, and **JWT-based authentication**.
+A production-ready backend system for managing patients, queues, appointments, visits, reports, reminders, and user authentication for a small clinic or private practice.
 
-> 🚀 Designed for real-world clinics & hospital workflows
+This repository focuses on clean modular APIs designed to scale with clinic growth.
 
----
+🔗 Base URL
+http://localhost:3000/clinic-crm-api
 
-## ✨ Features
 
-* 🔐 **Authentication & Authorization** (JWT, Roles: Admin, Doctor, Staff)
-* 👤 **User Management** (Register, Login, Forgot/Reset Password)
-* 🧑‍⚕️ **Patient Management** (CRUD)
-* 🩺 **Doctor Management**
-* ⏱️ **Queue & Appointment System**
-* 📊 **Clinic Dashboard APIs** (Upcoming)
-* 🧾 **Validation & Error Handling**
-* 📁 **Clean MVC Architecture**
+All routes are prefixed with:
 
----
+app.use("/clinic-crm-api", router);
 
-## 🛠️ Tech Stack
+🔐 Authentication Flow (ENTRY POINT)
 
-* **Backend:** Node.js, Express.js
-* **Database:** MongoDB + Mongoose
-* **Auth:** JWT (JSON Web Token)
-* **Security:** bcrypt, dotenv
-* **Dev Tools:** Nodemon
+Authentication is JWT-based.
+All protected routes require a valid token.
 
----
+1️⃣ Register
+POST /auth/register
 
-## 📂 Project Structure
 
-```
-clinic-crm-backend/
-├── src/
-│   ├── config/
-│   │   ├── db.js
-│   │   └── jwt.js
-│   ├── controllers/
-│   │   ├── auth.controller.js
-│   │   ├── patient.controller.js
-│   │   └── queue.controller.js
-│   ├── middlewares/
-│   │   ├── auth.middleware.js
-│   │   └── role.middleware.js
-│   ├── models/
-│   │   ├── User.model.js
-│   │   ├── Patient.model.js
-│   │   └── Queue.model.js
-│   ├── routes/
-│   │   ├── auth.routes.js
-│   │   ├── patient.routes.js
-│   │   └── queue.routes.js
-│   ├── utils/
-│   │   └── response.js
-│   └── server.js
-├── .env.example
-├── package.json
-├── README.md
-└── .gitignore
-```
+Creates a new doctor / clinic staff account.
 
----
+Request Body
 
-## 🔑 Authentication Flow
+{
+  "name": "Dr John",
+  "email": "doctor@test.com",
+  "password": "123456"
+}
 
-1. User logs in
-2. Server generates **JWT token**
-3. Token is sent in headers:
+2️⃣ Login
+POST /auth/login
 
-```
-Authorization: Bearer <token>
-```
 
-4. Protected routes validate token via middleware
+Response
 
----
+{
+  "token": "JWT_TOKEN"
+}
 
-## 🌐 API Base URL
 
-```
-http://localhost:3000/api
-```
+🔐 Use this token for all protected APIs
 
----
+Header Format
 
-## 📌 API Endpoints (Current)
+Authorization: Bearer JWT_TOKEN
 
-### Auth
+3️⃣ Forgot Password (OTP via Email)
+POST /auth/forget-password
 
-| Method | Endpoint              | Description     |
-| ------ | --------------------- | --------------- |
-| POST   | /auth/register        | Register user   |
-| POST   | /auth/login           | Login user      |
-| POST   | /auth/forgot-password | Forgot password |
-| POST   | /auth/reset-password  | Reset password  |
 
-### Patients
+Request Body
 
-| Method | Endpoint      | Description       |
-| ------ | ------------- | ----------------- |
-| POST   | /patients     | Create patient    |
-| GET    | /patients     | Get all patients  |
-| GET    | /patients/:id | Get patient by ID |
-| PUT    | /patients/:id | Update patient    |
-| DELETE | /patients/:id | Delete patient    |
+{
+  "email": "doctor@test.com"
+}
 
-### Queue
 
-| Method | Endpoint | Description          |
-| ------ | -------- | -------------------- |
-| POST   | /queue   | Add patient to queue |
-| GET    | /queue   | Get today queue      |
+📧 Sends a 6-digit OTP to the registered email.
 
----
+4️⃣ Reset Password
+POST /auth/reset-password
 
-## ⚙️ Environment Variables
 
-Create a `.env` file based on `.env.example`
+Request Body
 
-```
-PORT=3000
-MONGO_URI=mongodb://localhost:27017/clinic-crm
-JWT_SECRET=your_secret_key
-JWT_EXPIRES_IN=8h
-```
+{
+  "email": "doctor@test.com",
+  "otp": "123456",
+  "newPassword": "newPass123"
+}
 
----
+👤 USER MODULE
+Upload / Update Profile Image
+POST /user
 
-## ▶️ Run Locally
 
-```bash
-# Install dependencies
-npm install
+Headers
 
-# Run in development
-npm run dev
+Authorization: Bearer JWT_TOKEN
 
-# Run in production
-npm start
-```
 
----
+Body (form-data)
 
-## 🧪 Upcoming Features
+Key	Type	Description
+image	File	Profile image
 
-* 📅 Appointment Scheduling
-* 📊 Analytics Dashboard APIs
-* 🔔 Notifications
-* 🧑‍💼 Staff Role Permissions
-* 🧪 Unit & Integration Tests
+📌 Image is uploaded to Cloudinary, and the URL is stored in the database.
 
----
+Change Password (Logged-in User)
+POST /user/change-password
 
-## 🤝 Contribution
 
-Contributions are welcome!
+Request Body
 
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/xyz`)
-3. Commit changes (`git commit -m 'Add feature'`)
-4. Push to branch (`git push origin feature/xyz`)
-5. Open a Pull Request
+{
+  "oldPassword": "123456",
+  "newPassword": "newPass123"
+}
 
----
+🧍 PATIENT MODULE
+1️⃣ Add Patient
+POST /patient
 
-## 👨‍💻 Author
 
-**Sumit Jadhav**
-Full Stack Developer (React, React Native, Node.js)
+Request Body
 
----
+{
+  "name": "Rahul Sharma",
+  "age": 32,
+  "gender": "Male",
+  "phone": "9876543210",
+  "address": "Mumbai"
+}
 
-## ⭐ Support
+2️⃣ List All Patients
+GET /patient
 
-If you like this project, please ⭐ the repository to support development!
+
+📊 Used for dashboard patient listing.
+
+3️⃣ Get Patient by ID
+GET /patient/:id
+
+
+📁 Used when opening a patient profile.
+
+⏳ QUEUE MODULE (CORE CLINIC FLOW)
+
+Manages the real-time patient waiting system.
+
+1️⃣ Add Patient to Queue
+POST /queue
+
+
+Request Body
+
+{
+  "patientId": "PATIENT_ID"
+}
+
+
+➡ Automatically assigns a queue number.
+
+2️⃣ List Current Queue
+GET /queue
+
+
+➡ Displays the active waiting list.
+
+3️⃣ Update Queue Status
+PATCH /queue/:id
+
+
+Request Body
+
+{
+  "status": "COMPLETED"
+}
+
+
+Allowed Status Values
+
+WAITING
+
+IN_PROGRESS
+
+COMPLETED
+
+CANCELLED
+
+📅 APPOINTMENT MODULE
+
+Used for future visits and scheduled consultations.
+
+Create Appointment
+POST /appointment
+
+
+Request Body
+
+{
+  "patientId": "PATIENT_ID",
+  "date": "2026-01-10",
+  "time": "11:30 AM"
+}
+
+List Appointments
+GET /appointment
+
+🩺 VISIT MODULE (MEDICAL RECORDS)
+
+Each doctor consultation creates one visit record.
+
+1️⃣ Create Visit
+POST /visit
+
+
+Request Body
+
+{
+  "patientId": "PATIENT_ID",
+  "complaint": "Fever",
+  "diagnosis": "Viral",
+  "prescription": "Paracetamol"
+}
+
+2️⃣ Get Patient Visit History
+GET /visit/:id
+
+
+📌 id = patientId
+
+➡ Displays complete medical history timeline.
+
+📄 REPORT MODULE (PDF / IMAGE UPLOADS)
+
+Supports medical reports, prescriptions, lab results.
+
+Upload Patient Report
+POST /report
+
+
+Body (form-data)
+
+Key	Type	Description
+file	File	PDF / Image
+patientId	Text	Patient ID
+
+📦 Files are stored securely on Cloudinary.
+
+Get Patient Reports
+GET /report/:patientId
+
+
+➡ Used in Patient Profile → Reports Section.
+
+⏰ REMINDER MODULE (PARTIALLY IMPLEMENTED)
+Add Reminder
+POST /reminders
+
+
+Request Body
+
+{
+  "patientId": "PATIENT_ID",
+  "message": "Follow-up after 7 days",
+  "date": "2026-01-15"
+}
+
+
+📌 Currently stored in DB only
+📌 SMS / WhatsApp not enabled due to funding constraints
+
+🔁 COMPLETE APPLICATION FLOW
+Register / Login
+      ↓
+Add Patient
+      ↓
+Add to Queue
+      ↓
+Doctor Consultation
+      ↓
+Create Visit
+      ↓
+Upload Reports
+      ↓
+(Optional) Appointment / Reminder
+
+🔐 SECURITY NOTES
+
+JWT-based authentication
+
+Route protection via middleware
+
+Password hashing using bcrypt
+
+OTP-based password reset flow
+
+Cloudinary for secure file storage
+
+🧪 POSTMAN TESTING ORDER (IMPORTANT)
+
+Auth → Login
+
+Patient → Add
+
+Queue → Add
+
+Visit → Create
+
+Report → Upload
+
+Queue → Update Status
+
+🧩 TECH STACK
+
+Node.js
+
+Express.js
+
+MongoDB + Mongoose
+
+JWT Authentication
+
+Cloudinary
+
+Nodemailer
+
+Multer
+
+🚧 FUTURE ENHANCEMENTS
+
+SMS / WhatsApp reminders
+
+Role-based access control
+
+Analytics dashboard
+
+Real-time queue using Socket.IO
