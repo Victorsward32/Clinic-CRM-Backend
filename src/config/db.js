@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv"
 
+
+dotenv.config();
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      "mongodb+srv://sumitjadhav8331_db_user:Sumit%406067@cluster-clinic-crm-tool.heubn4y.mongodb.net/clinic_crm?retryWrites=true&w=majority"
-    );
+    const conn = await mongoose.connect(process.env.mongo_db_url);
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

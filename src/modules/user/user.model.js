@@ -24,6 +24,10 @@ export const userSchema = new mongoose.Schema(
       enum: ["DOCTOR", "STAFF"],
       default: "STAFF",
     },
+    profileImage: {
+      url: String,
+      publicId: String,
+    },
     isActive: {
       type: Boolean,
       default: true,

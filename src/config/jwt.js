@@ -3,8 +3,8 @@ import dotenv from "dotenv"
 
 dotenv.config();
 
-const SECRET_KEY="Victorsward@6067";
-const EXPIRES_IN= "8h";
+const SECRET_KEY=process.env.jwt_secret_key;
+const EXPIRES_IN= process.env.jwt_token_expires_in;
 
 export const generateToken = (payload)=>{
     const token = jwt.sign(payload,SECRET_KEY,{expiresIn: EXPIRES_IN})
