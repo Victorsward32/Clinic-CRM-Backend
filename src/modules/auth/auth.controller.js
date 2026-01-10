@@ -1,4 +1,4 @@
-import { registerUser,loginUser, forgetPasswordService } from "./auth.service.js";
+import { registerUser,loginUser, forgetPasswordService, resetPasswordService } from "./auth.service.js";
 
 
 export const register =async (req,res,next)=>{
@@ -35,7 +35,7 @@ try {
 
 export const forgetPassword = async (req,res,next) =>{
     try {
-        const password = forgetPasswordService(req.body.email);
+        const password = await forgetPasswordService(req.body.email);
         res.status(201).json({
             success:true,
             message:password
@@ -50,9 +50,16 @@ export const forgetPassword = async (req,res,next) =>{
 
 export const resetPassword = async (req, res, next) => {
   try {
+
     const { email, otp, newPassword } = req.body;
+
+
     await resetPasswordService(email, otp, newPassword);
-    res.json({ success: true, message: "Password reset successful" });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful"
+    });
   } catch (error) {
     next(error);
   }

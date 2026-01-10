@@ -1,4 +1,5 @@
 import User from "./user.model.js";
+import bcrypt from "bcrypt";
 
 export const updateProfileImageService = async (userId, file) => {
   const user = await User.findById(userId);

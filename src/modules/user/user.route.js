@@ -6,7 +6,7 @@ import authMiddleware from "../../middlewares/auth.middleware.js";
 
 const userRoutes = express.Router();
 
-userRoutes.post('/', authMiddleware ,uploadUserImage.single("image"),uploadProfileImage);
+userRoutes.post('/update-profile-picture', authMiddleware ,uploadUserImage.single("image"),uploadProfileImage);
 userRoutes.post("/change-password", authMiddleware, changePassword);
 
 

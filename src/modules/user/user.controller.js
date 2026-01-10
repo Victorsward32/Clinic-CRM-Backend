@@ -1,4 +1,4 @@
-import {  updateProfileImageService } from "./user.service.js";
+import {  changePasswordService, updateProfileImageService } from "./user.service.js";
 
 export const uploadProfileImage = async (req, res, next) => {
   try {

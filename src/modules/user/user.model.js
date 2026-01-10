@@ -28,6 +28,12 @@ export const userSchema = new mongoose.Schema(
       url: String,
       publicId: String,
     },
+     resetOTP: {
+      type: String,
+    },
+    resetOTPExpiry: {
+      type: Date,
+    },
     isActive: {
       type: Boolean,
       default: true,

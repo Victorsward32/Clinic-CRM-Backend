@@ -2,6 +2,7 @@ import { generateHashPassword ,comparePassword } from "../../utils/password.js";
 import { generateToken } from "../../config/jwt.js";
 import User from "../user/user.model.js";
 import { transporter } from "../../config/email.js";
+import { emailTemplate } from "../../utils/email.template.js";
 
 
 export const registerUser = async (data)=>{
@@ -31,11 +32,11 @@ export const loginUser = async (email,password)=>{
 
 
 export const forgetPasswordService = async (email)=>{
-    const user=User.findOne({email});
+    const user= await User.findOne({email});
      if (!user) throw new Error("User not found");
      // create otp
-     const otp = Math.floor(100000 + Math.random()*900000).toString()
-     console.log("Asshole remove this console",otp);
+     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
 
      user.resetOTP = otp;
      user.resetOTPExpiry = Date.now()+10*60*1000;  // 10 mins
@@ -46,7 +47,7 @@ export const forgetPasswordService = async (email)=>{
     from: `"Clinic CRM" <${process.env.APP_EMAIL}>`,
     to: user.email,
     subject: "Password Reset OTP",
-    html: forgotPasswordTemplate(otp, user.name)
+    html: emailTemplate(otp, user.name)
   });
 
     return true;
@@ -55,13 +56,13 @@ export const forgetPasswordService = async (email)=>{
 export const resetPasswordService = async (email, otp, newPassword) => {
   const user = await User.findOne({
     email,
-    resetOTP: otp,
+    resetOTP: String(otp),
     resetOTPExpiry: { $gt: Date.now() }
   });
 
   if (!user) throw new Error("Invalid or expired OTP");
 
-  user.password = await bcrypt.hash(newPassword, 10);
+  user.password = await generateHashPassword(newPassword);
   user.resetOTP = null;
   user.resetOTPExpiry = null;
 
