@@ -5,7 +5,7 @@ import { getPatientReport, uploadPatientReport } from "./report.controller.js";
 
 const reportRoutes= express.Router();
 
-reportRoutes.post('/',authMiddleware,uploadReport.single('file'),uploadPatientReport)
+reportRoutes.post("/",authMiddleware,uploadReport.single('file'),uploadPatientReport)
 reportRoutes.get('/:patientId',authMiddleware,getPatientReport)
 
 export default reportRoutes

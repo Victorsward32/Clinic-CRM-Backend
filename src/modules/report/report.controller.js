@@ -25,8 +25,10 @@ export const uploadPatientReport  = async (req,res,next)=>{
 export const getPatientReport = async (req,res,next)=>{
     try {
         const report = await getPatientReportsService(req.params.patientId);
+        console.log("Reports fetched:",req.params.patientId);
+        console.log(report);
 
-        res.status(201).josn({
+        res.status(201).json({
             success:true,
             message:report
         })

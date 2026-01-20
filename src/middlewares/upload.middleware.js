@@ -6,7 +6,9 @@ const imageStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "clinic/user",
+    resource_type: "raw",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    access_mode: "public",
   },
 });
 

@@ -16,6 +16,7 @@ export const uploadPatientReportService = async({
   });
 };
 
-export const getPatientReportsService = async (patientId) => {
-  return await Report.find({ patient: patientId });
+export const getPatientReportsService = async (patient) => {
+
+  return await report.find({ patientId: patient });
 };
