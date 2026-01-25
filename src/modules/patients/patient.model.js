@@ -24,6 +24,19 @@ const patientSchema = new mongoose.Schema(
       enum: ["MALE", "FEMALE"],
       default: "MALE",
     },
+    phoneNumber: {
+      type: String,
+      require: true, 
+      trim: true 
+    },
+    profileImage:{
+       url: String,
+      publicId: String,
+    },
+      email: {        
+      type: String,
+      require: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -31,6 +44,8 @@ const patientSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+patientSchema.index({ name: 1, phone: 1 }, { unique: true });
 
 const patient = mongoose.model("patient", patientSchema);
 

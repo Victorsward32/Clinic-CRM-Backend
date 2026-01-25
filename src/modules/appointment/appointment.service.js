@@ -1,5 +1,7 @@
 import appointment from "./appointment.model.js";
 
+// Add validation next time care fully
+
 export const createAppointment = async (data,doctorId)=>{
     return await appointment.create({
         ...data,
