@@ -3,8 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import router from "./route/routes.js";
 import errorHandler from "./middlewares/error.middleware.js";
-import dotenv from 'dotenv';
-dotenv.config();
+import env from "./config/env.js";
 
 // ---------- Express Middlewares ------------//
 const app = express();
@@ -21,9 +20,7 @@ app.use(express.urlencoded({ extended: true }));
  * For production: Restrict to specific frontend URL (use env variable)
  */
 const corsOptions = {
-  // In production, use: origin: process.env.FRONTEND_URL || "http://localhost:3000"
-  // For now, allow all origins (change before deploying)
-  origin: process.env.FRONTEND_URL || "*",
+  origin: env.frontendUrl,
   
   // HTTP methods allowed
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -32,7 +29,7 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
   
   // Allow credentials (cookies, auth headers) if frontend sends them
-  credentials: process.env.FRONTEND_URL ? true : false,
+  credentials: env.frontendUrl !== "*",
   
   // Max age for preflight cache (24 hours)
   maxAge: 86400

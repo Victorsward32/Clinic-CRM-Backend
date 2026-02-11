@@ -6,7 +6,7 @@ const imageStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "clinic/user",
-    resource_type: "raw",
+    resource_type: "auto",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
     access_mode: "public",
   },
@@ -18,6 +18,7 @@ const reportStorage = new CloudinaryStorage({
     folder: "clinic/reports",
     resource_type: "auto",
     allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+    access_mode: "public",
   },
 });
 

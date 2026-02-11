@@ -1,7 +1,8 @@
-import { registerUser, loginUser, forgetPasswordService, resetPasswordService } from "./auth.service.js";
+import { registerUser, registerStaff, loginUser, forgetPasswordService, resetPasswordService } from "./auth.service.js";
 import { AUTH_MESSAGES } from "../../utils/TextConstants.js";
 import { AUTH_ERRORS } from "../../utils/ErrorConstants.js";
 
+// DOCTOR REGISTRATION
 export const register = async (req, res, next) => {
   try {
     const user = await registerUser(req.body);
@@ -21,6 +22,27 @@ export const register = async (req, res, next) => {
   }
 };
 
+// STAFF REGISTRATION (NEW)
+export const registerStaffController = async (req, res, next) => {
+  try {
+    const staff = await registerStaff({ ...req.body, doctorId: req.user.id });
+    res.status(201).json({
+      success: true,
+      message: "Staff registered successfully",
+      data: staff
+    });
+  } catch (error) {
+    if (error.status) {
+      next(error);
+    } else {
+      const err = new Error(error.message || "Registration failed");
+      err.status = 400;
+      next(err);
+    }
+  }
+};
+
+// COMBINED LOGIN
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -36,7 +58,8 @@ export const login = async (req, res, next) => {
       success: true,
       message: AUTH_MESSAGES.LOGIN_SUCCESS,
       token: result.token,
-      user: result.user
+      user: result.user,
+      doctorId: result.doctorId || null
     });
   } catch (error) {
     if (error.status) {

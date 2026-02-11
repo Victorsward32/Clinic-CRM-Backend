@@ -1,5 +1,8 @@
 import { Server } from "socket.io";
 import { verifyToken } from "../config/jwt.js";
+import env from "../config/env.js";
+import logger from "../services/logger.service.js";
+import { doctorRoom } from "../sockets/rooms.js";
 
 let io;
 
@@ -26,10 +29,10 @@ export const initSocketServer = (server) => {
     const corsOptions = {
         // In production, use: origin: process.env.FRONTEND_URL || "http://localhost:3000"
         // Must match Express CORS origin setting
-        origin: process.env.FRONTEND_URL || "*",
+        origin: env.frontendUrl,
         
         // Allow credentials (auth tokens in headers)
-        credentials: process.env.FRONTEND_URL ? true : false,
+        credentials: env.frontendUrl !== "*",
         
         // HTTP methods for WebSocket upgrade
         methods: ["GET", "POST"]
@@ -47,14 +50,14 @@ export const initSocketServer = (server) => {
      * WHY: First security checkpoint - rejects unauthenticated connections immediately
      */
     io.on("connection", (socket) => {
-        console.log(`[Socket.IO] New client connected: ${socket.id}`);
+        logger.info(`[Socket.IO] New client connected: ${socket.id}`);
 
         try {
             // Step 1: Extract token from handshake auth
             const token = socket.handshake.auth.token;
             
             if (!token) {
-                console.warn(`[Socket.IO] ${socket.id} - No auth token provided`);
+                logger.warn(`[Socket.IO] ${socket.id} - No auth token provided`);
                 socket.disconnect(true);
                 return;
             }
@@ -64,7 +67,7 @@ export const initSocketServer = (server) => {
             const decoded = verifyToken(token);
             
             if (!decoded) {
-                console.warn(`[Socket.IO] ${socket.id} - Invalid or expired token`);
+                logger.warn(`[Socket.IO] ${socket.id} - Invalid or expired token`);
                 socket.disconnect(true);
                 return;
             }
@@ -74,7 +77,7 @@ export const initSocketServer = (server) => {
             socket.userId = decoded.id;
             socket.userRole = decoded.role;
             
-            console.log(`[Socket.IO] ${socket.id} authenticated as user ${decoded.id}`);
+            logger.info(`[Socket.IO] ${socket.id} authenticated as user ${decoded.id}`);
 
             // Step 4: Listen for explicit room joining
             socket.on("join-doctor-room", (doctorId) => {
@@ -88,21 +91,21 @@ export const initSocketServer = (server) => {
 
             // Step 6: Log disconnection
             socket.on("disconnect", () => {
-                console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+                logger.info(`[Socket.IO] Client disconnected: ${socket.id}`);
             });
 
             // Step 7: Handle errors
             socket.on("error", (error) => {
-                console.error(`[Socket.IO] ${socket.id} - Error:`, error.message);
+                logger.error(`[Socket.IO] ${socket.id} - Error`, { message: error.message });
             });
 
         } catch (error) {
-            console.error(`[Socket.IO] Connection error for ${socket.id}:`, error.message);
+            logger.error(`[Socket.IO] Connection error for ${socket.id}`, { message: error.message });
             socket.disconnect(true);
         }
     });
 
-    console.log("[Socket.IO] Initialized successfully");
+    logger.info("[Socket.IO] Initialized successfully");
 };
 
 /**
@@ -122,14 +125,14 @@ const handleDoctorRoomJoin = (socket, doctorId) => {
     try {
         // Validate doctorId is not null/empty
         if (!doctorId || typeof doctorId !== "string") {
-            console.warn(`[Socket.IO] ${socket.id} - Invalid doctorId format`);
+            logger.warn(`[Socket.IO] ${socket.id} - Invalid doctorId format`);
             socket.emit("error", { message: "Invalid doctorId" });
             return;
         }
 
         // Validate doctorId is a valid MongoDB ObjectId (24 hex chars)
         if (!/^[0-9a-f]{24}$/i.test(doctorId)) {
-            console.warn(`[Socket.IO] ${socket.id} - doctorId not valid ObjectId: ${doctorId}`);
+            logger.warn(`[Socket.IO] ${socket.id} - doctorId not valid ObjectId: ${doctorId}`);
             socket.emit("error", { message: "Invalid ObjectId format" });
             return;
         }
@@ -142,7 +145,7 @@ const handleDoctorRoomJoin = (socket, doctorId) => {
         //     return;
         // }
 
-        const roomName = `doctor:${doctorId}`;
+        const roomName = doctorRoom(doctorId);
         
         // Leave any previously joined doctor rooms (prevent duplicate emissions)
         // WHY: User might reconnect or switch doctors - clean up old rooms
@@ -151,12 +154,12 @@ const handleDoctorRoomJoin = (socket, doctorId) => {
         );
         previousRooms.forEach((room) => {
             socket.leave(room);
-            console.log(`[Socket.IO] ${socket.id} left room ${room}`);
+            logger.info(`[Socket.IO] ${socket.id} left room ${room}`);
         });
 
         // Join the doctor room
         socket.join(roomName);
-        console.log(`[Socket.IO] ${socket.id} joined room ${roomName}`);
+        logger.info(`[Socket.IO] ${socket.id} joined room ${roomName}`);
 
         // Confirm to client
         socket.emit("room-joined", {
@@ -165,7 +168,7 @@ const handleDoctorRoomJoin = (socket, doctorId) => {
         });
 
     } catch (error) {
-        console.error(`[Socket.IO] Error joining doctor room for ${socket.id}:`, error.message);
+        logger.error(`[Socket.IO] Error joining doctor room for ${socket.id}`, { message: error.message });
         socket.emit("error", { message: "Failed to join room" });
     }
 };
@@ -181,7 +184,7 @@ const handleDoctorRoomJoin = (socket, doctorId) => {
 export const getIO = () => {
     if (!io) {
         const error = new Error("Socket.IO not initialized. Call initSocketServer first.");
-        console.error(error.message);
+        logger.error(error.message);
         throw error;
     }
     return io;
@@ -198,10 +201,10 @@ export const getIO = () => {
  */
 export const emitQueueUpdate = (doctorId, eventName, data) => {
     try {
-        const roomName = `doctor:${doctorId}`;
+        const roomName = doctorRoom(doctorId);
         io.to(roomName).emit(eventName, data);
-        console.log(`[Socket.IO] Emitted ${eventName} to ${roomName}`);
+        logger.info(`[Socket.IO] Emitted ${eventName} to ${roomName}`);
     } catch (error) {
-        console.error(`[Socket.IO] Error emitting ${eventName}:`, error.message);
+        logger.error(`[Socket.IO] Error emitting ${eventName}`, { message: error.message });
     }
 };

@@ -3,11 +3,11 @@ import app from "./app.js"
 import http from "http"
 import connectDB from "./config/db.js";
 // import "./jobs/reminder.job.js"
-import dotenv from 'dotenv'
 import { initSocketServer } from "./socket/server.js";
-dotenv.config();
+import env from "./config/env.js";
+import logger from "./services/logger.service.js";
 
-const PORT=process.env.port || 3000 ;
+const PORT=env.port;
 
 const server=http.createServer(app); // Create HTTP server Because app is express application 
 
@@ -17,7 +17,7 @@ initSocketServer(server);
 connectDB().then(
     ()=>{
     server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  logger.info(`Server running on http://localhost:${PORT}`);
 });   
     }
 )

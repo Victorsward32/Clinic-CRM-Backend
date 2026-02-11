@@ -1,0 +1,279 @@
+{
+  "id": "47f5075d-e2de-41cf-af50-c996722c9bb8",
+  "name": "Clinic CRM - Local Hardened Env",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/clinic-crm-api",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "doctor_name",
+      "value": "Dr Sumit",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "doctor_email",
+      "value": "doctor.sumit+1@cliniccrm.local",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "doctor_phone",
+      "value": "9990001111",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "doctor_password",
+      "value": "Doctor@12345",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "staff_name",
+      "value": "Reception Staff",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_email",
+      "value": "staff.sumit+1@cliniccrm.local",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_phone",
+      "value": "9990002222",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_password",
+      "value": "Staff@12345",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "staff_role",
+      "value": "RECEPTIONIST",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_name",
+      "value": "Rahul Verma",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_age",
+      "value": "29",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_gender",
+      "value": "MALE",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_phone_number",
+      "value": "9990003333",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_email",
+      "value": "rahul.verma+1@patient.local",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_address",
+      "value": "Sector 21, Gurgaon",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_weight",
+      "value": "72",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_height",
+      "value": "173",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "consultation_fee",
+      "value": "50000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "payment_mode",
+      "value": "CASH",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "report_year",
+      "value": "2026",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "report_month",
+      "value": "2",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "staff_token",
+      "value": "",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "doctor_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_doctor_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "staff_member_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "patient_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "appointment_date",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "appointment_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "queue_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "in_progress_queue_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "visit_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "follow_up_date",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "earning_id",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "reset_otp",
+      "value": "000000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "reset_password_new",
+      "value": "Doctor@12345",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "queue_status_update",
+      "value": "WAITING",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "user_new_password",
+      "value": "Doctor@12345",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "profile_image_file",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "report_file",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "reminder_channel",
+      "value": "SMS",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "reminder_message",
+      "value": "Please visit clinic at your scheduled time.",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "reminder_send_at",
+      "value": "",
+      "enabled": true,
+      "type": "default"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-02-11T00:00:00.000Z",
+  "_postman_exported_using": "Codex GPT-5"
+}

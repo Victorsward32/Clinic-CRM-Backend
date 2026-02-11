@@ -82,6 +82,7 @@ export const USER_MESSAGES = {
   USER_FETCHED: "User fetched successfully",
   USERS_LIST_FETCHED: "Users list fetched successfully",
   PROFILE_IMAGE_REMOVED: "Profile image removed successfully",
+  PASSWORD_CHANGED_SUCCESS: "Password changed successfully",
 };
 
 // General Messages

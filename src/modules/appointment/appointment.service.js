@@ -23,10 +23,10 @@ export const getTodayAppointments = async (doctorId)=>{
     }).populate("patient")
 }
 
-export const updateAppointmentStatus = async (id,status)=>{
-    return await appointment.findByIdAndUpdate(
-        id,
-        {status},
+export const updateAppointmentStatus = async (id,doctorId,status)=>{
+    return await appointment.findOneAndUpdate(
+        { _id: id, doctor: doctorId },
+        { status },
         {new : true}
     )
 

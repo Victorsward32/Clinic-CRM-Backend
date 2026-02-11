@@ -1,99 +1,79 @@
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/appError.js";
+import { parseSchema } from "../../validators/common.validator.js";
 import {
+  createPatientSchema,
+  patientIdParamSchema,
+  patientSearchQuerySchema,
+} from "../../validators/patient.validator.js";
+import {
+  archivePatientById,
+  createPatient,
   getPatientById,
   getPatientData,
-  createPatient,
+  getPatientHistoryById,
 } from "./patient.service.js";
-import { PATIENT_MESSAGES } from "../../utils/TextConstants.js";
-import { PATIENT_ERRORS } from "../../utils/ErrorConstants.js";
 
-export const addPatient = async (req, res, next) => {
-  try {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      const err = new Error(PATIENT_ERRORS.MISSING_REQUIRED_FIELDS.message);
-      err.status = PATIENT_ERRORS.MISSING_REQUIRED_FIELDS.status;
-      return next(err);
-    }
-    
-
-
-    const patient = await createPatient(req.body, req.user.id);
-    res.status(201).json({
-      success: true,
-      message: PATIENT_MESSAGES.PATIENT_CREATED,
-      data: patient,
-    });
-  } catch (error) {
-    if (error.status) {
-      next(error);
-    } else if (error.message.includes("duplicate")) {
-      const err = new Error(PATIENT_ERRORS.PATIENT_EMAIL_EXISTS.message);
-      err.status = PATIENT_ERRORS.PATIENT_EMAIL_EXISTS.status;
-      next(err);
-    } else {
-      const err = new Error(PATIENT_ERRORS.INVALID_PATIENT_DATA.message);
-      err.status = PATIENT_ERRORS.INVALID_PATIENT_DATA.status;
-      next(err);
-    }
+export const addPatient = asyncHandler(async (req, res) => {
+  if (!req.doctorScopeId) {
+    throw new AppError("Doctor scope is missing", 403, "DOCTOR_SCOPE_REQUIRED");
   }
-};
 
-export const listOfPatient = async (req, res, next) => {
-  try {
-    const { search } = req.query;
-    const patients = await getPatientData(search);
+  const payload = parseSchema(createPatientSchema, req.body);
+  const patient = await createPatient(payload, req.doctorScopeId);
 
-    if (!patients || patients.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: PATIENT_MESSAGES.NO_PATIENTS_FOUND,
-        data: [],
-      });
-    }
+  res.status(201).json({
+    success: true,
+    message: "Patient created successfully",
+    data: patient,
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      message: PATIENT_MESSAGES.PATIENTS_LIST_FETCHED,
-      data: patients,
-    });
-  } catch (error) {
-    if (error.status) {
-      next(error);
-    } else {
-      const err = new Error(PATIENT_ERRORS.INVALID_PATIENT_DATA.message);
-      err.status = PATIENT_ERRORS.INVALID_PATIENT_DATA.status;
-      next(err);
-    }
+export const listOfPatient = asyncHandler(async (req, res) => {
+  parseSchema(patientSearchQuerySchema, req.query);
+  const { search } = req.query;
+  const patients = await getPatientData(search);
+
+  res.status(200).json({
+    success: true,
+    message: patients.length ? "Patients list fetched successfully" : "No patients found",
+    data: patients,
+  });
+});
+
+export const getPatient = asyncHandler(async (req, res) => {
+  const { id } = parseSchema(patientIdParamSchema, req.params);
+  const patient = await getPatientById(id);
+
+  if (!patient) {
+    throw new AppError("Patient not found", 404, "PATIENT_NOT_FOUND");
   }
-};
 
-export const getPatient = async (req, res, next) => {
-  try {
-    if (!req.params.id) {
-      const err = new Error(PATIENT_ERRORS.INVALID_PATIENT_DATA.message);
-      err.status = PATIENT_ERRORS.INVALID_PATIENT_DATA.status;
-      return next(err);
-    }
+  res.status(200).json({
+    success: true,
+    message: "Patient fetched successfully",
+    data: patient,
+  });
+});
 
-    const patient = await getPatientById(req.params.id);
+export const archivePatient = asyncHandler(async (req, res) => {
+  const { id } = parseSchema(patientIdParamSchema, req.params);
+  const archived = await archivePatientById(id);
 
-    if (!patient) {
-      const err = new Error(PATIENT_ERRORS.PATIENT_NOT_FOUND.message);
-      err.status = PATIENT_ERRORS.PATIENT_NOT_FOUND.status;
-      return next(err);
-    }
+  res.status(200).json({
+    success: true,
+    message: "Patient archived successfully",
+    data: archived,
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      message: PATIENT_MESSAGES.PATIENT_FETCHED,
-      data: patient,
-    });
-  } catch (error) {
-    if (error.status) {
-      next(error);
-    } else {
-      const err = new Error(PATIENT_ERRORS.PATIENT_NOT_FOUND.message);
-      err.status = PATIENT_ERRORS.PATIENT_NOT_FOUND.status;
-      next(err);
-    }
-  }
-};
+export const patientHistory = asyncHandler(async (req, res) => {
+  const { id } = parseSchema(patientIdParamSchema, req.params);
+  const history = await getPatientHistoryById(id);
+
+  res.status(200).json({
+    success: true,
+    message: "Patient history fetched successfully",
+    data: history,
+  });
+});

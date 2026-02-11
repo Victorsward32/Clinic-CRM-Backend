@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { QUEUE_PRIORITY, QUEUE_STATUS } from "../../constants/enums.js";
 
 const queueSchema = new mongoose.Schema({
     tokenNumber:{
@@ -17,8 +18,12 @@ const queueSchema = new mongoose.Schema({
     },
     priority:{
         type:String,
-        enum:["EMERGENCY","NORMAL"],
-        default:"NORMAL"
+        enum:Object.values(QUEUE_PRIORITY),
+        default:QUEUE_PRIORITY.NORMAL
+    },
+    priorityScore: {
+        type: Number,
+        default: 0
     },
     appointmentId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -27,8 +32,8 @@ const queueSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:["WAITING", "IN_PROGRESS", "COMPLETED", "SKIPPED"],
-        default:"WAITING"
+        enum:Object.values(QUEUE_STATUS),
+        default:QUEUE_STATUS.WAITING
     },
     // Track when patient was called for consultation
     calledAt:{
@@ -51,22 +56,37 @@ const queueSchema = new mongoose.Schema({
 // IMPORTANT: Compound index ensures uniqueness of (doctor, patient, status) for active queue entries
 // Prevents same patient from joining queue twice in WAITING/IN_PROGRESS states
 queueSchema.index(
-    { doctor: 1, patient: 1, status: 1 },
+    { doctor: 1, patient: 1 },
     { 
+        unique: true,
         name: "unique_active_queue_entry",
         // Use sparse index to allow multiple COMPLETED/SKIPPED entries for same patient
-        sparse: true,
         partialFilterExpression: {
-            status: { $in: ["WAITING", "IN_PROGRESS"] }
+            status: { $in: [QUEUE_STATUS.WAITING, QUEUE_STATUS.IN_PROGRESS] }
         }
     }
 );
 
-// Index for efficient queue ordering: by priority (descending) then tokenNumber (ascending)
-queueSchema.index({ doctor: 1, status: 1, priority: -1, tokenNumber: 1 });
+// Enforce one active consultation at a time for each doctor.
+queueSchema.index(
+    { doctor: 1, status: 1 },
+    {
+      unique: true,
+      partialFilterExpression: { status: QUEUE_STATUS.IN_PROGRESS },
+      name: "unique_doctor_in_progress"
+    }
+);
+
+// Index for efficient queue ordering: emergency first then tokenNumber FIFO.
+queueSchema.index({ doctor: 1, status: 1, priorityScore: -1, tokenNumber: 1 });
 
 // Index for history queries
 queueSchema.index({ doctor: 1, status: 1, completedAt: -1 });
+queueSchema.index({ doctor: 1, createdAt: -1 });
+
+queueSchema.pre("validate", function setPriorityScore() {
+  this.priorityScore = this.priority === QUEUE_PRIORITY.EMERGENCY ? 1 : 0;
+});
 
 const queue = mongoose.model("Queue",queueSchema);
 

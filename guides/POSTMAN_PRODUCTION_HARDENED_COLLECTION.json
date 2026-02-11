@@ -1,0 +1,960 @@
+{
+  "info": {
+    "name": "Clinic CRM - Production Hardened Flow",
+    "_postman_id": "7c0f2092-1f8a-4674-a6ba-58f645f53ce2",
+    "description": "Run folders top-to-bottom for end-to-end flow. This collection auto-saves tokens and IDs in environment variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Register Doctor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{doctor_name}}\",\n  \"email\": \"{{doctor_email}}\",\n  \"phone\": \"{{doctor_phone}}\",\n  \"password\": \"{{doctor_password}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Login Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.environment.set('doctor_token', json.token);",
+                  "if (json.user && json.user._id) pm.environment.set('doctor_id', json.user._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctor_email}}\",\n  \"password\": \"{{doctor_password}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Register Staff (Doctor Auth)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('staff_member_id', json.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{staff_name}}\",\n  \"email\": \"{{staff_email}}\",\n  \"phone\": \"{{staff_phone}}\",\n  \"password\": \"{{staff_password}}\",\n  \"role\": \"{{staff_role}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/register-staff"
+          }
+        },
+        {
+          "name": "Login Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.environment.set('staff_token', json.token);",
+                  "if (json.user && json.user._id) pm.environment.set('staff_id', json.user._id);",
+                  "if (json.doctorId) pm.environment.set('staff_doctor_id', json.doctorId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{staff_email}}\",\n  \"password\": \"{{staff_password}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Forget Password (OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/forget-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctor_email}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset Password (Manual OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctor_email}}\",\n  \"otp\": \"{{reset_otp}}\",\n  \"newPassword\": \"{{reset_password_new}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Patients",
+      "item": [
+        {
+          "name": "Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('patient_id', json.data._id);",
+                  "if (json.data && json.data.phoneNumber) pm.environment.set('patient_phone_number', json.data.phoneNumber);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{patient_name}}\",\n  \"age\": {{patient_age}},\n  \"gender\": \"{{patient_gender}}\",\n  \"phoneNumber\": \"{{patient_phone_number}}\",\n  \"email\": \"{{patient_email}}\",\n  \"address\": \"{{patient_address}}\",\n  \"weight\": {{patient_weight}},\n  \"height\": {{patient_height}}\n}"
+            },
+            "url": "{{base_url}}/patient"
+          }
+        },
+        {
+          "name": "List Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/patient?search={{patient_name}}"
+          }
+        },
+        {
+          "name": "Get Patient By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/patient/{{patient_id}}"
+          }
+        },
+        {
+          "name": "Get Patient History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/patient/{{patient_id}}/history"
+          }
+        },
+        {
+          "name": "Archive Patient (Soft Delete) - Optional",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/patient/{{patient_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Appointments",
+      "item": [
+        {
+          "name": "Create Appointment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = new Date(Date.now() + 60 * 60 * 1000);",
+                  "pm.environment.set('appointment_date', d.toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('appointment_id', json.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient\": \"{{patient_id}}\",\n  \"appointmentDate\": \"{{appointment_date}}\",\n  \"type\": \"WALKING\",\n  \"reason\": \"General consultation\"\n}"
+            },
+            "url": "{{base_url}}/appointment"
+          }
+        },
+        {
+          "name": "Get Today Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              }
+            ],
+            "url": "{{base_url}}/appointment/today"
+          }
+        },
+        {
+          "name": "Update Appointment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SCHEDULED\"\n}"
+            },
+            "url": "{{base_url}}/appointment/{{appointment_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Queue",
+      "item": [
+        {
+          "name": "Add Patient To Queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('queue_id', json.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"priority\": \"NORMAL\"\n}"
+            },
+            "url": "{{base_url}}/queue"
+          }
+        },
+        {
+          "name": "List Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              }
+            ],
+            "url": "{{base_url}}/queue"
+          }
+        },
+        {
+          "name": "Call Next Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('in_progress_queue_id', json.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/queue/call-next"
+          }
+        },
+        {
+          "name": "Queue History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/queue/history"
+          }
+        },
+        {
+          "name": "Complete Queue Entry (Legacy Endpoint) - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/queue/{{in_progress_queue_id}}/complete",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultationFee\": {{consultation_fee}},\n  \"paymentMode\": \"{{payment_mode}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Skip Queue Entry - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/queue/{{queue_id}}/skip"
+          }
+        },
+        {
+          "name": "Manual Queue Status Update - Optional",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/queue/{{queue_id}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{queue_status_update}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Visit & Prescription",
+      "item": [
+        {
+          "name": "Start Visit (From Queue)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) pm.environment.set('visit_id', json.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"queueId\": \"{{in_progress_queue_id}}\",\n  \"symptoms\": \"Fever and throat pain\"\n}"
+            },
+            "url": "{{base_url}}/visit"
+          }
+        },
+        {
+          "name": "Complete Visit + Prescription",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const f = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);",
+                  "pm.environment.set('follow_up_date', f.toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diagnosis\": \"Viral pharyngitis\",\n  \"followUpDate\": \"{{follow_up_date}}\",\n  \"consultationFee\": {{consultation_fee}},\n  \"paymentMode\": \"{{payment_mode}}\",\n  \"prescription\": {\n    \"advice\": \"Hydration and rest\",\n    \"medicines\": [\n      {\n        \"name\": \"Paracetamol 650\",\n        \"dosage\": \"1 tablet\",\n        \"frequency\": \"TID\",\n        \"duration\": \"5 days\",\n        \"instructions\": \"After food\"\n      },\n      {\n        \"name\": \"Warm saline gargle\",\n        \"dosage\": \"1 session\",\n        \"frequency\": \"BID\",\n        \"duration\": \"4 days\",\n        \"instructions\": \"Morning and evening\"\n      }\n    ]\n  }\n}"
+            },
+            "url": "{{base_url}}/visit/{{visit_id}}/complete"
+          }
+        },
+        {
+          "name": "List Patient Visits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/visit/{{patient_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Earnings (Doctor Only)",
+      "item": [
+        {
+          "name": "Get Earnings List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && Array.isArray(json.data) && json.data.length > 0) {",
+                  "  pm.environment.set('earning_id', json.data[0]._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings?page=1&limit=20"
+          }
+        },
+        {
+          "name": "Get Earnings Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings/summary"
+          }
+        },
+        {
+          "name": "Get Monthly Earnings Aggregation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings/monthly"
+          }
+        },
+        {
+          "name": "Get Earnings Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings/report?type=monthly&year={{report_year}}&month={{report_month}}"
+          }
+        },
+        {
+          "name": "Get Earning By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings/{{earning_id}}"
+          }
+        },
+        {
+          "name": "Update Earning",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Paid and reconciled\",\n  \"paymentMode\": \"{{payment_mode}}\"\n}"
+            },
+            "url": "{{base_url}}/earnings/{{earning_id}}"
+          }
+        },
+        {
+          "name": "Delete Earning - Optional",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings/{{earning_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Staff Management (Doctor Only)",
+      "item": [
+        {
+          "name": "Get Staff List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/staff"
+          }
+        },
+        {
+          "name": "Get Staff By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/staff/{{staff_member_id}}"
+          }
+        },
+        {
+          "name": "Deactivate Staff",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/staff/{{staff_member_id}}/deactivate"
+          }
+        },
+        {
+          "name": "Activate Staff",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/staff/{{staff_member_id}}/activate"
+          }
+        },
+        {
+          "name": "Update Staff - Optional",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/staff/{{staff_member_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Staff Name\",\n  \"phone\": \"9990008888\",\n  \"role\": \"NURSE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Staff - Optional",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/staff/{{staff_member_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Security Checks",
+      "item": [
+        {
+          "name": "Staff Cannot Access Earnings (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Staff blocked from earnings', function () {",
+                  "  pm.expect([401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              }
+            ],
+            "url": "{{base_url}}/earnings"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - User Profile (Optional)",
+      "item": [
+        {
+          "name": "Change Password - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/user/change-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"{{doctor_password}}\",\n  \"newPassword\": \"{{user_new_password}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Profile Picture - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/user/update-profile-picture",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{profile_image_file}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Reports (Optional)",
+      "item": [
+        {
+          "name": "Upload Report - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/report",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "patientId",
+                  "value": "{{patient_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{report_file}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Reports - Optional",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": "{{base_url}}/report/{{patient_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Reminders (Optional)",
+      "item": [
+        {
+          "name": "Create Reminder - Optional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/reminders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient\": \"{{patient_id}}\",\n  \"phone\": \"{{patient_phone_number}}\",\n  \"channel\": \"{{reminder_channel}}\",\n  \"message\": \"{{reminder_message}}\",\n  \"sendAt\": \"{{reminder_send_at}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = new Date(Date.now() + 2 * 60 * 60 * 1000);",
+                  "pm.environment.set(\"reminder_send_at\", d.toISOString());"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

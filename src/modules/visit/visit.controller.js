@@ -1,71 +1,50 @@
-import { createVisit, getPatientVisits } from "./visit.service.js";
-import { VISIT_ERRORS } from "../../utils/ErrorConstants.js";
-import { VISIT_MESSAGES } from "../../utils/TextConstants.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/appError.js";
+import { parseSchema } from "../../validators/common.validator.js";
+import {
+  completeVisitSchema,
+  startVisitSchema,
+  visitIdParamSchema,
+} from "../../validators/visit.validator.js";
+import { completeVisit, createVisit, getPatientVisits } from "./visit.service.js";
+import { patientIdParamSchema } from "../../validators/patient.validator.js";
 
-export const addVisit = async (req, res, next) => {
-  try {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      const err = new Error(VISIT_ERRORS.MISSING_VISIT_FIELDS.message);
-      err.status = VISIT_ERRORS.MISSING_VISIT_FIELDS.status;
-      return next(err);
-    }
+export const addVisit = asyncHandler(async (req, res) => {
+  const doctorId = req.doctorScopeId;
+  if (!doctorId) throw new AppError("Doctor scope is missing", 403, "DOCTOR_SCOPE_REQUIRED");
 
-    if (req.body.visitDate && new Date(req.body.visitDate) > new Date()) {
-      const err = new Error(VISIT_ERRORS.VISIT_DATE_IN_FUTURE.message);
-      err.status = VISIT_ERRORS.VISIT_DATE_IN_FUTURE.status;
-      return next(err);
-    }
+  const payload = parseSchema(startVisitSchema, req.body);
+  const visit = await createVisit(payload, doctorId);
 
-    const visit = await createVisit(req.body, req.user.id);
+  res.status(201).json({
+    success: true,
+    message: "Visit created successfully",
+    data: visit,
+  });
+});
 
-    res.status(201).json({
-      success: true,
-      message: VISIT_MESSAGES.VISIT_CREATED,
-      data: visit,
-    });
-  } catch (error) {
-    if (error.status) {
-      next(error);
-    } else {
-      const err = new Error(VISIT_ERRORS.INVALID_VISIT_DATA.message);
-      err.status = VISIT_ERRORS.INVALID_VISIT_DATA.status;
-      next(err);
-    }
-  }
-};
+export const completeVisitController = asyncHandler(async (req, res) => {
+  const doctorId = req.doctorScopeId;
+  if (!doctorId) throw new AppError("Doctor scope is missing", 403, "DOCTOR_SCOPE_REQUIRED");
 
-export const listVisit = async (req, res, next) => {
-  try {
-    const patientId = req.params.id;
+  const { id: visitId } = parseSchema(visitIdParamSchema, req.params);
+  const payload = parseSchema(completeVisitSchema, req.body);
 
-    if (!patientId) {
-      const err = new Error(VISIT_ERRORS.INVALID_VISIT_DATA.message);
-      err.status = VISIT_ERRORS.INVALID_VISIT_DATA.status;
-      return next(err);
-    }
+  const visit = await completeVisit(visitId, doctorId, payload);
+  res.status(200).json({
+    success: true,
+    message: "Visit completed successfully",
+    data: visit,
+  });
+});
 
-    const visits = await getPatientVisits(patientId);
+export const listVisit = asyncHandler(async (req, res) => {
+  const { id: patientId } = parseSchema(patientIdParamSchema, req.params);
+  const visits = await getPatientVisits(patientId);
 
-    if (!visits || visits.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: VISIT_MESSAGES.NO_VISITS_FOUND,
-        data: [],
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: VISIT_MESSAGES.PATIENT_VISIT_HISTORY,
-      data: visits,
-    });
-  } catch (error) {
-    if (error.status) {
-      next(error);
-    } else {
-      const err = new Error(VISIT_ERRORS.INVALID_VISIT_DATA.message);
-      err.status = VISIT_ERRORS.INVALID_VISIT_DATA.status;
-      next(err);
-    }
-  }
-};
+  res.status(200).json({
+    success: true,
+    message: visits.length ? "Patient visit history fetched successfully" : "No visits found",
+    data: visits,
+  });
+});

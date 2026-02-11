@@ -1,12 +1,20 @@
-import express, { Router } from  "express";
-import { addPatient,getPatient,listOfPatient } from "./patient.controller.js";
-import authMiddleware from "../../middlewares/auth.middleware.js";
+import express from  "express";
+import {
+  addPatient,
+  archivePatient,
+  getPatient,
+  listOfPatient,
+  patientHistory,
+} from "./patient.controller.js";
+import authMiddleware, { requireDoctorOrStaff } from "../../middlewares/auth.middleware.js";
 
 const patientRoutes =express.Router();
 
 
-patientRoutes.post("/", authMiddleware, addPatient);
-patientRoutes.get("/", authMiddleware, listOfPatient);
-patientRoutes.get("/:id", authMiddleware, getPatient);
+patientRoutes.post("/", authMiddleware, requireDoctorOrStaff, addPatient);
+patientRoutes.get("/", authMiddleware, requireDoctorOrStaff, listOfPatient);
+patientRoutes.get("/:id/history", authMiddleware, requireDoctorOrStaff, patientHistory);
+patientRoutes.get("/:id", authMiddleware, requireDoctorOrStaff, getPatient);
+patientRoutes.delete("/:id", authMiddleware, requireDoctorOrStaff, archivePatient);
 
 export default patientRoutes
